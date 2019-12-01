@@ -35,27 +35,27 @@ class BisectionBandwidthAnalyzer(private val graph: NetworkGraph, private var th
 
             if (finished) break
 
-            for (i in 0 until droppedNodes) {
+            while (droppedNodes > 0) {
                 lastNode++
 
                 if (lastNode == nodes.size) {
-                    finished = true
-                    break
-                }
-                addToGroup(nodes[lastNode])
-
-                while (aggregatedBandwidth >= threshold) {
-                    removeLastFromGroup()
-                    lastNode++
-
-                    if (lastNode == nodes.size) {
+                    if (firstGroup.isEmpty()) {
                         finished = true
                         break
                     }
-                    addToGroup(nodes[lastNode])
+                    lastNode = removeLastFromGroup()
+                    droppedNodes++
+                    continue
                 }
 
-                if (finished) break
+                addToGroup(nodes[lastNode])
+                droppedNodes--
+
+                if (droppedNodes == 0 && aggregatedBandwidth >= threshold) {
+                    lastNode = removeLastFromGroup()
+                    droppedNodes++
+                    continue
+                }
             }
         }
     }
