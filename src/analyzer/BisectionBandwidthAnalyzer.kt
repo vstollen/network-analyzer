@@ -1,12 +1,13 @@
 package analyzer
 
-class BisectionBandwidthAnalyzer(private val graph: NetworkGraph, private var threshold: Int = Int.MAX_VALUE) {
+class BisectionBandwidthAnalyzer(graph: NetworkGraph, private var threshold: Int = Int.MAX_VALUE) {
 
     private val nodes = graph.nodes
 
     private val firstGroup = ArrayList<NetworkGraph.Node>()
 
     private var aggregatedBandwidth = 0
+    private var cutConnections = 0
 
     fun analyze() {
 
@@ -65,8 +66,10 @@ class BisectionBandwidthAnalyzer(private val graph: NetworkGraph, private var th
         for (connection in node.connections) {
             if (firstGroup.contains(connection.key)) {
                 aggregatedBandwidth -= connection.value
+                cutConnections--
             } else {
                 aggregatedBandwidth += connection.value
+                cutConnections++
             }
         }
 
@@ -80,8 +83,10 @@ class BisectionBandwidthAnalyzer(private val graph: NetworkGraph, private var th
         for (connection in lastNode.connections) {
             if (firstGroup.contains(connection.key)) {
                 aggregatedBandwidth += connection.value
+                cutConnections++
             } else {
                 aggregatedBandwidth -= connection.value
+                cutConnections--
             }
         }
 
@@ -91,7 +96,8 @@ class BisectionBandwidthAnalyzer(private val graph: NetworkGraph, private var th
     private fun checkCurrentSolution() {
         if (aggregatedBandwidth < threshold) {
             println("New minimal Bandwidth: $aggregatedBandwidth")
-            println("First group: ${firstGroup.toString()}")
+            println("First group: $firstGroup")
+            println("Cut Connections: $cutConnections")
             threshold = aggregatedBandwidth
         }
     }
